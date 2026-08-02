@@ -26,9 +26,9 @@ void print_header() {
     std::cout << "\n";
     std::cout << "══════════════════════════════════════════════════════╗\n";
     std::cout << "║                                                      ║\n";
-    std::cout << "║         RESTORA - File Recovery Tool v1.0.1          ║\n";
+    std::cout << "║         RESTORA - File Recovery Tool v1.0.3          ║\n";
     std::cout << "║                                                      \n";
-    std::cout << "║    Native C++ • Ultra Light • Works on Old PCs   ║\n";
+    std::cout << "║    Derived from Restora Tauri • Made for Old PCs   ║\n";
     std::cout << "║                                                      ║\n";
     std::cout << "╚══════════════════════════════════════════════════════╝\n";
     std::cout << "\n";

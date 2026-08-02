@@ -258,52 +258,74 @@ void scan_menu(ScanConfig& config) {
 }
 
 int main() {
-    // Set console title
-#ifdef _WIN32
-    SetConsoleTitleA("Restora - File Recovery Tool");
-#endif
-    
-    ScanConfig config;
-    config.scan_type = "fast";
-    config.destination = "C:\\Recovered";
-    config.filter_thumbnails = true;
-    config.repair_damaged = true;
-    config.skip_duplicates = true;
-    config.min_file_size = 0;
-    config.max_file_size = 5000000000; // 5GB
-    
-    while (true) {
-        console::print_header();
-        console::print_menu();
+    try {
+        // Set console title
+    #ifdef _WIN32
+        SetConsoleTitleA("Restora - File Recovery Tool");
+    #endif
         
-        int choice = console::get_user_choice();
+        ScanConfig config;
+        config.scan_type = "fast";
+        config.destination = "C:\\Recovered";
+        config.filter_thumbnails = true;
+        config.repair_damaged = true;
+        config.skip_duplicates = true;
+        config.min_file_size = 0;
+        config.max_file_size = 5000000000; // 5GB
         
-        switch (choice) {
-            case 1:
-                scan_menu(config);
-                break;
-            case 2:
-                console::print_header();
-                console::print_drives(get_drives());
-                console::wait_key();
-                break;
-            case 3:
-                show_settings(config);
-                break;
-            case 4:
-                show_about();
-                break;
-            case 0:
-                console::print_header();
-                std::cout << "Thank you for using Restora!\n";
-                std::cout << "Goodbye!\n\n";
-                return 0;
-            default:
-                console::print_error("Invalid choice!");
-                console::wait_key();
-                break;
+        while (true) {
+            console::print_header();
+            console::print_menu();
+            
+            int choice = console::get_user_choice();
+            
+            switch (choice) {
+                case 1:
+                    scan_menu(config);
+                    break;
+                case 2:
+                    console::print_header();
+                    console::print_drives(get_drives());
+                    console::wait_key();
+                    break;
+                case 3:
+                    show_settings(config);
+                    break;
+                case 4:
+                    show_about();
+                    break;
+                case 0:
+                    console::print_header();
+                    std::cout << "Thank you for using Restora!\n";
+                    std::cout << "Goodbye!\n\n";
+                    #ifdef _WIN32
+                    system("pause");
+                    #endif
+                    return 0;
+                default:
+                    console::print_error("Invalid choice!");
+                    console::wait_key();
+                    break;
+            }
         }
+        
+        #ifdef _WIN32
+        system("pause");
+        #endif
+        return 0;
+    } catch (const std::exception& e) {
+        std::cerr << "\nFATAL ERROR: " << e.what() << "\n";
+        std::cerr << "The application will close. Please try again.\n";
+        #ifdef _WIN32
+        system("pause");
+        #endif
+        return 1;
+    } catch (...) {
+        std::cerr << "\nUNKNOWN FATAL ERROR occurred!\n";
+        std::cerr << "The application will close. Please try again.\n";
+        #ifdef _WIN32
+        system("pause");
+        #endif
+        return 1;
     }
-    
-    return 0;
 }
