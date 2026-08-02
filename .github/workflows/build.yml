@@ -11,149 +11,69 @@ permissions:
 
 jobs:
   build-windows-64:
-    name: Build Windows 64-bit (MinGW)
+    name: Build Windows 64-bit
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
     steps:
       - uses: actions/checkout@v4
+      
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-make
+          update: true
 
-      - name: Install MinGW-w64
-        run: |
-          choco install mingw -y
-          echo "C:\tools\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-      - name: Build with CMake
+      - name: Build
         run: |
           mkdir build
           cd build
-          cmake .. -G "MinGW Makefiles" -DCMAKE_CXX_COMPILER=g++.exe
+          cmake .. -G "MinGW Makefiles"
           mingw32-make
 
       - name: Rename executable
         run: |
-          copy build\restora.exe Restora.exe
+          cp build/restora.exe Restora.exe
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: windows-64bit
           path: Restora.exe
 
   build-windows-32:
-    name: Build Windows 32-bit (MinGW)
+    name: Build Windows 32-bit
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
     steps:
       - uses: actions/checkout@v4
+      
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW32
+          install: >-
+            mingw-w64-i686-gcc
+            mingw-w64-i686-cmake
+            mingw-w64-i686-make
+          update: true
 
-      - name: Install MinGW-w64
-        run: |
-          choco install mingw -y
-          echo "C:\tools\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-      - name: Build with CMake
+      - name: Build
         run: |
           mkdir build
           cd build
-          cmake .. -G "MinGW Makefiles" -DCMAKE_CXX_COMPILER=g++.exe -DCMAKE_C_COMPILER=gcc.exe -DCMAKE_SYSTEM_PROCESSOR=x86
+          cmake .. -G "MinGW Makefiles"
           mingw32-make
 
       - name: Rename executable
         run: |
-          copy build\restora.exe Restora-x86.exe
+          cp build/restora.exe Restora-x86.exe
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: windows-32bit
           path: Restora-x86.exe
-
-  build-ubuntu:
-    name: Build Ubuntu
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake
-
-      - name: Build with CMake
-        run: |
-          mkdir build
-          cd build
-          cmake ..
-          make -j$(nproc)
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ubuntu
-          path: build/restora
-
-  build-macos:
-    name: Build macOS
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build with CMake
-        run: |
-          mkdir build
-          cd build
-          cmake ..
-          make -j$(sysctl -n hw.ncpu)
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos
-          path: build/restora
-
-  create-release:
-    name: Create Release
-    needs: [build-windows-64, build-windows-32, build-ubuntu, build-macos]
-    runs-on: ubuntu-22.04
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: List all downloaded files
-        run: find artifacts/ -type f
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            artifacts/**/*.exe
-          draft: false
-          prerelease: false
-          generate_release_notes: true
-          name: 'Restora C++ ${{ github.ref_name }}'
-          body: |
-            ## 🔄 Restora C++ ${{ github.ref_name }} - Native File Recovery Tool
-
-            ###  Downloads
-
-            | Plataforma | Arquivo |
-            |------------|---------|
-            | ️ Windows 64-bit | `Restora.exe` |
-            | ️ Windows 32-bit | `Restora-x86.exe` |
-
-            ### ✨ Recursos
-            - 🔍 Scan rápido e profundo
-            - 🖼️ Recuperação de imagens, vídeos, áudios, documentos
-            - 🔧 Reparo automático de arquivos danificados
-            - 🖼️ Filtro de thumbnails
-            - 💻 Funciona com apenas 2GB de RAM
-            - ️ Suporte a 32-bit Windows para PCs antigos
-            -  Código nativo C++, sem frameworks
-            -  Interface console simples e direta
-
-            ###  Instalação
-            - **Windows**: Baixe o `.exe` e execute diretamente
-            - **Windows 7/8**: Instale Visual C++ Redistributable se necessário

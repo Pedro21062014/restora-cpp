@@ -9,22 +9,28 @@ set(CMAKE_BUILD_TYPE Release)
 
 if(MINGW)
     # MinGW flags - static linking to avoid DLL dependencies
-    add_compile_options(-O2 -Wall -Wno-unused-result -static)
-    add_link_options(-static -static-libgcc -static-libstdc++)
-    # Force 32-bit build if requested
+    # Optimize for OLD CPUs (Pentium 4 era) - no SSE2/SSE3 requirements
     if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-        add_compile_options(-m32)
-        add_link_options(-m32)
+        # 32-bit build for old PCs
+        add_compile_options(-O2 -Wall -Wno-unused-result -static -march=i686 -mtune=generic)
+        add_link_options(-static -static-libgcc -static-libstdc++)
+    else()
+        # 64-bit build
+        add_compile_options(-O2 -Wall -Wno-unused-result -static -march=x86-64 -mtune=generic)
+        add_link_options(-static -static-libgcc -static-libstdc++)
     endif()
+    
+    # Target Windows 7 (NT 6.1) for maximum compatibility
+    add_compile_definitions(WINVER=0x0601 _WIN32_WINNT=0x0601 _WIN32_IE=0x0700)
+    
+    # Set subsystem to Windows 7 compatible
+    add_link_options(-Wl,--subsystem,windows:6.01)
+    
 elseif(MSVC)
-    # MSVC flags for release
     add_compile_options(/O2 /W3 /DNDEBUG)
-    add_link_options(/SUBSYSTEM:CONSOLE)
-    if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-        add_link_options(/LARGEADDRESSAWARE)
-    endif()
+    add_compile_definitions(WINVER=0x0601 _WIN32_WINNT=0x0601)
+    add_link_options(/SUBSYSTEM:CONSOLE,6.01)
 else()
-    # GCC/Clang flags
     add_compile_options(-O2 -Wall)
 endif()
 
@@ -42,5 +48,4 @@ if(WIN32)
     target_link_libraries(restora PRIVATE shlwapi)
 endif()
 
-# Install
 install(TARGETS restora DESTINATION bin)
