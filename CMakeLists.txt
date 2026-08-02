@@ -11,6 +11,11 @@ if(MINGW)
     # MinGW flags - static linking to avoid DLL dependencies
     add_compile_options(-O2 -Wall -Wno-unused-result -static)
     add_link_options(-static -static-libgcc -static-libstdc++)
+    # Force 32-bit build if requested
+    if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+        add_compile_options(-m32)
+        add_link_options(-m32)
+    endif()
 elseif(MSVC)
     # MSVC flags for release
     add_compile_options(/O2 /W3 /DNDEBUG)
