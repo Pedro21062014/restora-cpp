@@ -77,3 +77,54 @@ jobs:
         with:
           name: windows-32bit
           path: Restora-x86.exe
+
+  create-release:
+    name: Create Release
+    needs: [build-windows-64, build-windows-32]
+    runs-on: ubuntu-22.04
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: find artifacts/ -type f
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/**/*.exe
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          name: 'Restora C++ ${{ github.ref_name }}'
+          body: |
+            ## 🔄 Restora C++ ${{ github.ref_name }}
+
+            ###  Downloads
+
+            | Plataforma | Arquivo |
+            |------------|---------|
+            | 🖥️ Windows 64-bit | `Restora.exe` |
+            | ️ Windows 32-bit (PCs antigos) | `Restora-x86.exe` |
+
+            ### ✨ Novidades
+            - Compilado com MSYS2 MINGW32/MINGW64 para compatibilidade máxima
+            - Funciona em Windows 7/8/8.1/10/11
+            - Sem dependências de DLLs externas
+            - Apenas ~3MB por executável
+            - Interface console simples estilo Recuva
+
+            ###  Uso
+            1. Baixe o `.exe` correspondente ao seu sistema
+            2. Execute diretamente (sem instalação)
+            3. Siga o menu no console
+
+            ### ️ Para PCs antigos
+            - Requer Windows 7 ou superior
+            - Apenas 5MB de RAM
+            - Funciona em processadores Pentium 4+
