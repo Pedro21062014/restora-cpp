@@ -59,7 +59,7 @@ std::vector<DriveInfo> get_drives() {
             char fs_name[MAX_PATH];
             DWORD serial, max_comp, flags;
             
-            if (GetVolumeInfoA(drive.label.c_str(), volume_name, MAX_PATH, 
+            if (GetVolumeInformationA(drive.label.c_str(), volume_name, MAX_PATH, 
                               &serial, &max_comp, &flags, fs_name, MAX_PATH)) {
                 drive.file_system = fs_name;
                 drive.label = volume_name[0] ? volume_name : drive.label;
@@ -125,7 +125,7 @@ bool check_footer(const std::string& path, const FileSignature& sig) {
     uint64_t file_size = file.tellg();
     if (file_size < sig.footer.size()) return false;
     
-    file.seekg(-(std::streamoff)sig.footer.size(), std::ios::end);
+    file.seekg(static_cast<std::streamoff>(-static_cast<std::streamoff>(sig.footer.size())), std::ios::end);
     std::vector<uint8_t> footer_bytes(sig.footer.size());
     file.read(reinterpret_cast<char*>(footer_bytes.data()), sig.footer.size());
     
@@ -383,7 +383,7 @@ ScanResult deep_scan(const ScanConfig& config) {
         }
 #endif
         
-        progress = std::min(95, progress + 1);
+        progress = (progress + 1 < 95) ? progress + 1 : 95;
         console::print_progress(progress, "Scanning " + current_dir.substr(0, 30) + "...");
     }
     
