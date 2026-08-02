@@ -3,6 +3,12 @@
 #include <fstream>
 #include <filesystem>
 
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <sys/stat.h>
+#endif
+
 namespace restora {
 
 std::vector<RecoveredFile> recover_files(const std::vector<RecoveredFile>& files, const ScanConfig& config) {
