@@ -4,13 +4,19 @@ project(Restora VERSION 1.1.4 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Release build only
+set(CMAKE_BUILD_TYPE Release)
+
 if(MSVC)
-    add_compile_options(/W4 /O2)
+    # MSVC flags for release
+    add_compile_options(/O2 /W3 /DNDEBUG)
+    add_link_options(/SUBSYSTEM:CONSOLE)
     if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-        add_link_options(/SUBSYSTEM:CONSOLE /LARGEADDRESSAWARE)
+        add_link_options(/LARGEADDRESSAWARE)
     endif()
 else()
-    add_compile_options(-Wall -O2)
+    # GCC/Clang flags
+    add_compile_options(-O2 -Wall)
 endif()
 
 add_executable(restora
