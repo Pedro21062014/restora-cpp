@@ -7,7 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Release build only
 set(CMAKE_BUILD_TYPE Release)
 
-if(MSVC)
+if(MINGW)
+    # MinGW flags - static linking to avoid DLL dependencies
+    add_compile_options(-O2 -Wall -Wno-unused-result -static)
+    add_link_options(-static -static-libgcc -static-libstdc++)
+elseif(MSVC)
     # MSVC flags for release
     add_compile_options(/O2 /W3 /DNDEBUG)
     add_link_options(/SUBSYSTEM:CONSOLE)

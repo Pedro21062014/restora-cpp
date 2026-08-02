@@ -11,22 +11,22 @@ permissions:
 
 jobs:
   build-windows-64:
-    name: Build Windows 64-bit
+    name: Build Windows 64-bit (MinGW)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup MSVC
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: amd64
+      - name: Install MinGW-w64
+        run: |
+          choco install mingw -y
+          echo "C:\tools\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Build with CMake
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles"
-          nmake
+          cmake .. -G "MinGW Makefiles" -DCMAKE_CXX_COMPILER=g++.exe
+          mingw32-make
 
       - name: Rename executable
         run: |
@@ -39,22 +39,22 @@ jobs:
           path: Restora.exe
 
   build-windows-32:
-    name: Build Windows 32-bit
+    name: Build Windows 32-bit (MinGW)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup MSVC
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: amd64_x86
+      - name: Install MinGW-w64 (32-bit)
+        run: |
+          choco install mingw -y
+          echo "C:\tools\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Build with CMake
         run: |
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles"
-          nmake
+          cmake .. -G "MinGW Makefiles" -DCMAKE_CXX_COMPILER=i686-w64-mingw32-g++.exe -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc.exe
+          mingw32-make
 
       - name: Rename executable
         run: |
